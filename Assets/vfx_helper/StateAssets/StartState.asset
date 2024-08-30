@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: StartState
+  m_EditorClassIdentifier: Assembly-CSharp::VFXStateAsset
+  materialState:
+    ColorSets:
+    - para_name: _myColor
+      color_para: {r: 2, g: 1.6660361, b: 0, a: 0}
+    FloatSets:
+    - para_name: _strength
+      float_para: 1
+    BoolSets: []
+  vfxGraphState:
+    ColorSets: []
+    FloatSets: []
+    BoolSets: []
+  particleSystemState:
+    FloatSets: []
+    BoolSets: []
+  transformState:
+    Vector3Sets: []
+    BoolSets: []
+  lightState:
+    color: {r: 0.121568635, g: 0.9960785, b: 0.9960785, a: 1}
+    intensity: 2
+    range: 10

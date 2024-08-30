@@ -10,13 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 0}
-  m_Name: NewVFXState
+  m_Name: EndState
   m_EditorClassIdentifier: Assembly-CSharp::VFXStateAsset
   materialState:
     ColorSets:
-    - para_name: 
-      color_para: {r: 0, g: 0, b: 0, a: 0}
-    FloatSets: []
+    - para_name: _myColor
+      color_para: {r: 0, g: 1.5850792, b: 2, a: 0}
+    FloatSets:
+    - para_name: _strength
+      float_para: 0.5
+    BoolSets: []
   vfxGraphState:
     ColorSets: []
     FloatSets: []
@@ -28,5 +31,6 @@ MonoBehaviour:
     Vector3Sets: []
     BoolSets: []
   lightState:
-    ColorSets: []
-    FloatSets: []
+    color: {r: 1, g: 0.8906151, b: 0, a: 0}
+    intensity: 5
+    range: 15
