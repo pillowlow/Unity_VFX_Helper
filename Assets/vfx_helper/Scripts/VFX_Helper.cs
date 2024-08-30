@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
-using Unity.VisualScripting;
+using UnityEngine.VFX;
 
 
 public class VFX_Helper : MonoBehaviour
@@ -114,6 +114,143 @@ public class VFX_Helper : MonoBehaviour
                     processingQueue.Add(new ProcessingItem("range", ParameterType.Float, light));
                 }
             }
+
+
+            // Handle Transform Components
+            foreach (var transformState in target.targetTransforms)
+            {
+                if (transformState != null && transition.fromState != null && transition.toState != null)
+                {
+                    // Add position, rotation, and scale to the processing queue
+                    processingQueue.Add(new ProcessingItem("position", ParameterType.Vector3, transformState.transform));
+                    processingQueue.Add(new ProcessingItem("rotation", ParameterType.Vector3, transformState.transform));
+                    processingQueue.Add(new ProcessingItem("scale", ParameterType.Vector3, transformState.transform));
+                }
+            }
+
+            // Handle VFX Graph Components
+            foreach (var vfxGraph in target.targetVFXGraphs)
+            {
+                if (vfxGraph != null && transition.fromState != null && transition.toState != null)
+                {
+                    // Traverse through all float parameters in fromState and toState
+                    foreach (var fromFloat in transition.fromState.vfxGraphState.FloatSets)
+                    {
+                        foreach (var toFloat in transition.toState.vfxGraphState.FloatSets)
+                        {
+                            if (fromFloat.para_name == toFloat.para_name)
+                            {
+                                processingQueue.Add(new ProcessingItem(fromFloat.para_name, ParameterType.Float, vfxGraph));
+                            }
+                        }
+                    }
+
+                    // Traverse through all color parameters in fromState and toState
+                    foreach (var fromColor in transition.fromState.vfxGraphState.ColorSets)
+                    {
+                        foreach (var toColor in transition.toState.vfxGraphState.ColorSets)
+                        {
+                            if (fromColor.para_name == toColor.para_name)
+                            {
+                                processingQueue.Add(new ProcessingItem(fromColor.para_name, ParameterType.Color, vfxGraph));
+                            }
+                        }
+                    }
+
+                    // Traverse through all int parameters in fromState and toState
+                    foreach (var fromInt in transition.fromState.vfxGraphState.IntSets)
+                    {
+                        foreach (var toInt in transition.toState.vfxGraphState.IntSets)
+                        {
+                            if (fromInt.para_name == toInt.para_name)
+                            {
+                                processingQueue.Add(new ProcessingItem(fromInt.para_name, ParameterType.Int, vfxGraph));
+                            }
+                        }
+                    }
+
+                    // Traverse through all vector3 parameters in fromState and toState
+                    foreach (var fromVector3 in transition.fromState.vfxGraphState.Vector3Sets)
+                    {
+                        foreach (var toVector3 in transition.toState.vfxGraphState.Vector3Sets)
+                        {
+                            if (fromVector3.para_name == toVector3.para_name)
+                            {
+                                processingQueue.Add(new ProcessingItem(fromVector3.para_name, ParameterType.Vector3, vfxGraph));
+                            }
+                        }
+                    }
+
+                    // Traverse through all bool parameters in fromState and toState
+                    foreach (var fromBool in transition.fromState.vfxGraphState.BoolSets)
+                    {
+                        foreach (var toBool in transition.toState.vfxGraphState.BoolSets)
+                        {
+                            if (fromBool.para_name == toBool.para_name)
+                            {
+                                processingQueue.Add(new ProcessingItem(fromBool.para_name, ParameterType.Bool, vfxGraph));
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            foreach (var particleSystem in target.targetParticleSystems)
+            {
+                if (particleSystem != null && transition.fromState != null && transition.toState != null)
+                {
+                    // Traverse through all float parameters in fromState and toState
+                    foreach (var fromFloat in transition.fromState.particleSystemState.FloatSets)
+                    {
+                        foreach (var toFloat in transition.toState.particleSystemState.FloatSets)
+                        {
+                            if (fromFloat.para_name == toFloat.para_name)
+                            {
+                                processingQueue.Add(new ProcessingItem(fromFloat.para_name, ParameterType.Float, particleSystem));
+                            }
+                        }
+                    }
+
+                    // Traverse through all color parameters in fromState and toState
+                    foreach (var fromColor in transition.fromState.particleSystemState.ColorSets)
+                    {
+                        foreach (var toColor in transition.toState.particleSystemState.ColorSets)
+                        {
+                            if (fromColor.para_name == toColor.para_name)
+                            {
+                                processingQueue.Add(new ProcessingItem(fromColor.para_name, ParameterType.Color, particleSystem));
+                            }
+                        }
+                    }
+
+
+                    // Traverse through all bool parameters in fromState and toState
+                    foreach (var fromBool in transition.fromState.particleSystemState.BoolSets)
+                    {
+                        foreach (var toBool in transition.toState.particleSystemState.BoolSets)
+                        {
+                            if (fromBool.para_name == toBool.para_name)
+                            {
+                                processingQueue.Add(new ProcessingItem(fromBool.para_name, ParameterType.Bool, particleSystem));
+                            }
+                        }
+                    }
+
+                    // Traverse through all vector3 parameters in fromState and toState
+                    foreach (var fromVector3 in transition.fromState.particleSystemState.Vector3Sets)
+                    {
+                        foreach (var toVector3 in transition.toState.particleSystemState.Vector3Sets)
+                        {
+                            if (fromVector3.para_name == toVector3.para_name)
+                            {
+                                processingQueue.Add(new ProcessingItem(fromVector3.para_name, ParameterType.Vector3, particleSystem));
+                            }
+                        }
+                    }
+                }
+            }
+            
         }
 
         Debug.Log($"Total Processing Items in Queue: {processingQueue.Count}");
@@ -139,30 +276,32 @@ public class VFX_Helper : MonoBehaviour
 
         foreach (var item in processingQueue)
         {
-            //Debug.Log($"Processing item: {item.parameterName} on Material: {item.targetMaterial.name} using Component: {item.targetComponent?.GetType().Name}");
+            //Debug.Log($"Processing item: {item.parameterName} using Component: {item.targetComponent?.GetType().Name}");
 
             if (item.targetMaterial != null && item.targetComponent is Renderer)
             {
-                //Debug.Log($"Starting ProcessMaterialItem coroutine for {item.parameterName} on {item.targetMaterial.name}");
                 processingCoroutines.Add(StartCoroutine(ProcessMaterialItem(item, transition)));
             }
-            else if (item.targetComponent != null)
+            else if (item.targetComponent is Light)
             {
-                if (item.targetComponent is Light)
-                {
-                    Debug.Log($"Starting ProcessLightItem coroutine for {item.parameterName}");
-                    processingCoroutines.Add(StartCoroutine(ProcessLightItem(item, transition)));
-                }
-                else if (item.targetComponent is Transform)
-                {
-                    Debug.Log($"Starting ProcessTransformItem coroutine for {item.parameterName}");
-                    processingCoroutines.Add(StartCoroutine(ProcessTransformItem(item, transition)));
-                }
+                processingCoroutines.Add(StartCoroutine(ProcessLightItem(item, transition)));
+            }
+            else if (item.targetComponent is Transform)
+            {
+                processingCoroutines.Add(StartCoroutine(ProcessTransformItem(item, transition)));
+            }
+            else if (item.targetComponent is VisualEffect)
+            {
+                processingCoroutines.Add(StartCoroutine(ProcessVFXGraphItem(item, transition)));
+            }
+            else if (item.targetComponent is ParticleSystem)
+            {
+                processingCoroutines.Add(StartCoroutine(ProcessParticleSystemItem(item, transition)));
             }
         }
 
         // Wait until all coroutines are finished
-        Debug.Log("Waiting for all processing coroutines to complete...");
+        //Debug.Log("Waiting for all processing coroutines to complete...");
         foreach (var coroutine in processingCoroutines)
         {
             yield return coroutine;
@@ -187,7 +326,7 @@ public class VFX_Helper : MonoBehaviour
         float elapsedTime = 0f;
         VFXProcessingState processingState = transition.processingStateAsset.processingState;
 
-        Debug.Log($"Checking duration for transition. Duration: {processingState.duration} seconds");
+       // Debug.Log($"Checking duration for transition. Duration: {processingState.duration} seconds");
 
         Renderer targetRenderer = item.targetComponent as Renderer;
 
@@ -201,18 +340,18 @@ public class VFX_Helper : MonoBehaviour
         {
             Material material = item.targetMaterial;
 
-            Debug.Log($"Item Target Material: {material.name} (Instance ID: {material.GetInstanceID()})");
+            //Debug.Log($"Item Target Material: {material.name} (Instance ID: {material.GetInstanceID()})");
 
             // Log all shared materials in the renderer
-            Debug.Log($"Shared Materials in {targetRenderer.name}:");
+            //Debug.Log($"Shared Materials in {targetRenderer.name}:");
             foreach (var sharedMat in targetRenderer.sharedMaterials)
             {
-                Debug.Log($" - {sharedMat.name} (Instance ID: {sharedMat.GetInstanceID()})");
+                //Debug.Log($" - {sharedMat.name} (Instance ID: {sharedMat.GetInstanceID()})");
             }
 
             if (material != null && System.Array.Exists(targetRenderer.sharedMaterials, sharedMat => sharedMat == material))
             {
-                Debug.Log($"Starting processing on material: {material.name} for parameter: {item.parameterName}");
+                //Debug.Log($"Starting processing on material: {material.name} for parameter: {item.parameterName}");
 
                 while (elapsedTime < processingState.duration)
                 {
@@ -220,14 +359,14 @@ public class VFX_Helper : MonoBehaviour
                     float normalizedTime = Mathf.Clamp01(elapsedTime / processingState.duration);
                     float curveValue = processingState.transitionCurve.Evaluate(normalizedTime);
 
-                    Debug.Log($"Processing {item.parameterName} on {material.name}. Elapsed Time: {elapsedTime}, Normalized Time: {normalizedTime}, Curve Value: {curveValue}");
+                    //Debug.Log($"Processing {item.parameterName} on {material.name}. Elapsed Time: {elapsedTime}, Normalized Time: {normalizedTime}, Curve Value: {curveValue}");
 
                     if (item.parameterType == ParameterType.Float)
                     {
                         float fromValue = transition.fromState.materialState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
                         float toValue = transition.toState.materialState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
                         float newValue = Mathf.Lerp(fromValue, toValue, curveValue);
-                        Debug.Log($"Setting float parameter '{item.parameterName}' from {fromValue} to {newValue}");
+                       // Debug.Log($"Setting float parameter '{item.parameterName}' from {fromValue} to {newValue}");
                         material.SetFloat(item.parameterName, newValue);
                     }
                     else if (item.parameterType == ParameterType.Color)
@@ -235,7 +374,7 @@ public class VFX_Helper : MonoBehaviour
                         Color fromValue = transition.fromState.materialState.ColorSets.Find(p => p.para_name == item.parameterName).color_para;
                         Color toValue = transition.toState.materialState.ColorSets.Find(p => p.para_name == item.parameterName).color_para;
                         Color newValue = Color.Lerp(fromValue, toValue, curveValue);
-                        Debug.Log($"Setting color parameter '{item.parameterName}' from {fromValue} to {newValue}");
+                        //Debug.Log($"Setting color parameter '{item.parameterName}' from {fromValue} to {newValue}");
                         material.SetColor(item.parameterName, newValue);
                     }
                     else if (item.parameterType == ParameterType.Bool)
@@ -243,14 +382,14 @@ public class VFX_Helper : MonoBehaviour
                         bool fromValue = transition.fromState.materialState.BoolSets.Find(p => p.para_name == item.parameterName).bool_para;
                         bool toValue = transition.toState.materialState.BoolSets.Find(p => p.para_name == item.parameterName).bool_para;
                         bool newValue = curveValue > 0.5f ? toValue : fromValue;
-                        Debug.Log($"Setting bool parameter '{item.parameterName}' to {newValue}");
+                        //Debug.Log($"Setting bool parameter '{item.parameterName}' to {newValue}");
                         material.SetFloat(item.parameterName, newValue ? 1.0f : 0.0f);
                     }
 
                     yield return null; // Continue on the next frame
                 }
 
-                Debug.Log($"Finished processing on material: {material.name} for parameter: {item.parameterName}");
+                //Debug.Log($"Finished processing on material: {material.name} for parameter: {item.parameterName}");
             }
             else
             {
@@ -277,7 +416,7 @@ public class VFX_Helper : MonoBehaviour
 
         if (targetLight != null)
         {
-            Debug.Log($"Starting processing on Light for parameter: {item.parameterName}");
+            //Debug.Log($"Starting processing on Light for parameter: {item.parameterName}");
 
             while (elapsedTime < processingState.duration)
             {
@@ -290,7 +429,7 @@ public class VFX_Helper : MonoBehaviour
                     float fromValue = transition.fromState.lightState.intensity;
                     float toValue = transition.toState.lightState.intensity;
                     float newValue = Mathf.Lerp(fromValue, toValue, curveValue);
-                    Debug.Log($"Setting light intensity from {fromValue} to {newValue}");
+                    //Debug.Log($"Setting light intensity from {fromValue} to {newValue}");
                     targetLight.intensity = newValue;
                 }
                 else if (item.parameterType == ParameterType.Color && item.parameterName == "color")
@@ -298,7 +437,7 @@ public class VFX_Helper : MonoBehaviour
                     Color fromValue = transition.fromState.lightState.color;
                     Color toValue = transition.toState.lightState.color;
                     Color newValue = Color.Lerp(fromValue, toValue, curveValue);
-                    Debug.Log($"Setting light color from {fromValue} to {newValue}");
+                    //Debug.Log($"Setting light color from {fromValue} to {newValue}");
                     targetLight.color = newValue;
                 }
                 else if (item.parameterType == ParameterType.Float && item.parameterName == "range")
@@ -306,14 +445,14 @@ public class VFX_Helper : MonoBehaviour
                     float fromValue = transition.fromState.lightState.range;
                     float toValue = transition.toState.lightState.range;
                     float newValue = Mathf.Lerp(fromValue, toValue, curveValue);
-                    Debug.Log($"Setting light range from {fromValue} to {newValue}");
+                    //Debug.Log($"Setting light range from {fromValue} to {newValue}");
                     targetLight.range = newValue;
                 }
 
                 yield return null;
             }
 
-            Debug.Log($"Finished processing on Light for parameter: {item.parameterName}");
+            //Debug.Log($"Finished processing on Light for parameter: {item.parameterName}");
         }
     }
 
@@ -324,41 +463,263 @@ public class VFX_Helper : MonoBehaviour
     {
         float elapsedTime = 0f;
         VFXProcessingState processingState = transition.processingStateAsset.processingState;
-        Transform transformComponent = item.targetComponent as Transform;
 
-        while (elapsedTime < processingState.duration)
+        Transform targetTransform = item.targetComponent as Transform;
+
+        if (targetTransform != null)
         {
-            elapsedTime += Time.deltaTime;
-            float normalizedTime = Mathf.Clamp01(elapsedTime / processingState.duration);
-            float curveValue = processingState.transitionCurve.Evaluate(normalizedTime);
+            //Debug.Log($"Starting processing on Transform for parameter: {item.parameterName}");
 
-            // Process transform parameter changes (example for position)
-            if (item.parameterType == ParameterType.Float)
+            TransformState fromState = transition.fromState.transformState;
+            TransformState toState = transition.toState.transformState;
+
+            while (elapsedTime < processingState.duration)
             {
-                // Handle float-specific processing if needed for Transform
-            }
-            else if (item.parameterType == ParameterType.Vector3)
-            {
-                Vector3 fromValue = transition.fromState.transformState.Vector3Sets.Find(p => p.para_name == item.parameterName).vector3_para;
-                Vector3 toValue = transition.toState.transformState.Vector3Sets.Find(p => p.para_name == item.parameterName).vector3_para;
-                Vector3 newValue = Vector3.Lerp(fromValue, toValue, curveValue);
-                if (item.parameterName == "position")
+                elapsedTime += Time.deltaTime;
+                float normalizedTime = Mathf.Clamp01(elapsedTime / processingState.duration);
+                float curveValue = processingState.transitionCurve.Evaluate(normalizedTime);
+
+                if (item.parameterType == ParameterType.Vector3)
                 {
-                    transformComponent.position = newValue;
+                    if (item.parameterName == "position")
+                    {
+                        Vector3 newValue = Vector3.Lerp(fromState.position, toState.position, curveValue);
+                        //Debug.Log($"Setting transform position to {newValue}");
+
+                        if (toState.mode == CoordinateMode.Local)
+                        {
+                            targetTransform.localPosition = newValue;
+                        }
+                        else
+                        {
+                            targetTransform.position = newValue;
+                        }
+                    }
+                    else if (item.parameterName == "rotation")
+                    {
+                        Quaternion fromValue = Quaternion.Euler(fromState.rotation);
+                        Quaternion toValue = Quaternion.Euler(toState.rotation);
+                        Quaternion newValue = Quaternion.Lerp(fromValue, toValue, curveValue);
+                        //Debug.Log($"Setting transform rotation to {newValue.eulerAngles}");
+
+                        if (toState.mode == CoordinateMode.Local)
+                        {
+                            targetTransform.localRotation = newValue;
+                        }
+                        else
+                        {
+                            targetTransform.rotation = newValue;
+                        }
+                    }
+                    else if (item.parameterName == "scale")
+                    {
+                        Vector3 newValue = Vector3.Lerp(fromState.scale, toState.scale, curveValue);
+                        //Debug.Log($"Setting transform scale to {newValue}");
+                        targetTransform.localScale = newValue;
+                    }
                 }
-                else if (item.parameterName == "rotation")
-                {
-                    transformComponent.rotation = Quaternion.Euler(newValue);
-                }
-                else if (item.parameterName == "scale")
-                {
-                    transformComponent.localScale = newValue;
-                }
+
+                yield return null; // Continue on the next frame
             }
 
-            yield return null; // Continue on the next frame
+            //Debug.Log($"Finished processing on Transform for parameter: {item.parameterName}");
         }
     }
+
+    private IEnumerator ProcessVFXGraphItem(ProcessingItem item, VFXTransition transition)
+    {
+        float elapsedTime = 0f;
+        VFXProcessingState processingState = transition.processingStateAsset.processingState;
+
+        VisualEffect targetVFX = item.targetComponent as VisualEffect;
+
+        if (targetVFX != null)
+        {
+            Debug.Log($"Starting processing on VFX Graph for parameter: {item.parameterName}");
+
+            while (elapsedTime < processingState.duration)
+            {
+                elapsedTime += Time.deltaTime;
+                float normalizedTime = Mathf.Clamp01(elapsedTime / processingState.duration);
+                float curveValue = processingState.transitionCurve.Evaluate(normalizedTime);
+
+                if (item.parameterType == ParameterType.Float)
+                {
+                    float fromValue = transition.fromState.vfxGraphState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
+                    float toValue = transition.toState.vfxGraphState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
+                    float newValue = Mathf.Lerp(fromValue, toValue, curveValue);
+                    //Debug.Log($"Setting float parameter '{item.parameterName}' from {fromValue} to {newValue}");
+                    targetVFX.SetFloat(item.parameterName, newValue);
+                }
+                else if (item.parameterType == ParameterType.Color)
+                {
+                    Color fromValue = transition.fromState.vfxGraphState.ColorSets.Find(p => p.para_name == item.parameterName).color_para;
+                    Color toValue = transition.toState.vfxGraphState.ColorSets.Find(p => p.para_name == item.parameterName).color_para;
+                    Color newValue = Color.Lerp(fromValue, toValue, curveValue);
+                    //Debug.Log($"Setting color parameter '{item.parameterName}' from {fromValue} to {newValue}");
+                    targetVFX.SetVector4(item.parameterName, newValue);
+                }
+                else if (item.parameterType == ParameterType.Int)
+                {
+                    int fromValue = transition.fromState.vfxGraphState.IntSets.Find(p => p.para_name == item.parameterName).int_para;
+                    int toValue = transition.toState.vfxGraphState.IntSets.Find(p => p.para_name == item.parameterName).int_para;
+                    int newValue = Mathf.RoundToInt(Mathf.Lerp(fromValue, toValue, curveValue));
+                    //Debug.Log($"Setting int parameter '{item.parameterName}' from {fromValue} to {newValue}");
+                    targetVFX.SetInt(item.parameterName, newValue);
+                }
+                else if (item.parameterType == ParameterType.Vector3)
+                {
+                    Vector3 fromValue = transition.fromState.vfxGraphState.Vector3Sets.Find(p => p.para_name == item.parameterName).vector3_para;
+                    Vector3 toValue = transition.toState.vfxGraphState.Vector3Sets.Find(p => p.para_name == item.parameterName).vector3_para;
+                    Vector3 newValue = Vector3.Lerp(fromValue, toValue, curveValue);
+                    //Debug.Log($"Setting vector3 parameter '{item.parameterName}' from {fromValue} to {newValue}");
+                    targetVFX.SetVector3(item.parameterName, newValue);
+                }
+                else if (item.parameterType == ParameterType.Bool)
+                {
+                    bool fromValue = transition.fromState.vfxGraphState.BoolSets.Find(p => p.para_name == item.parameterName).bool_para;
+                    bool toValue = transition.toState.vfxGraphState.BoolSets.Find(p => p.para_name == item.parameterName).bool_para;
+                    bool newValue = curveValue > 0.5f ? toValue : fromValue;
+                    //Debug.Log($"Setting bool parameter '{item.parameterName}' to {newValue}");
+                    targetVFX.SetBool(item.parameterName, newValue);
+                }
+
+                yield return null; // Continue on the next frame
+            }
+
+            Debug.Log($"Finished processing on VFX Graph for parameter: {item.parameterName}");
+        }
+    }
+
+
+    private IEnumerator ProcessParticleSystemItem(ProcessingItem item, VFXTransition transition)
+    {
+        float elapsedTime = 0f;
+        VFXProcessingState processingState = transition.processingStateAsset.processingState;
+
+        ParticleSystem targetParticleSystem = item.targetComponent as ParticleSystem;
+
+        if (targetParticleSystem != null)
+        {
+            Debug.Log($"Starting processing on Particle System for parameter: {item.parameterName}");
+
+            var mainModule = targetParticleSystem.main;
+            var emissionModule = targetParticleSystem.emission;
+
+            while (elapsedTime < processingState.duration)
+            {
+                elapsedTime += Time.deltaTime;
+                float normalizedTime = Mathf.Clamp01(elapsedTime / processingState.duration);
+                float curveValue = processingState.transitionCurve.Evaluate(normalizedTime);
+
+                // Handle Float Parameters
+                if (item.parameterType == ParameterType.Float)
+                {
+                    //Debug.Log(item.parameterName);
+                    if (item.parameterName == "Start Lifetime")
+                    {
+                        float fromValue = transition.fromState.particleSystemState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
+                        float toValue = transition.toState.particleSystemState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
+                        float newValue = Mathf.Lerp(fromValue, toValue, curveValue);
+                        //Debug.Log($"Setting startLifetime from {fromValue} to {newValue}");
+                        mainModule.startLifetime = newValue;
+                    }
+                    else if (item.parameterName == "Start Speed")
+                    {
+                        float fromValue = transition.fromState.particleSystemState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
+                        float toValue = transition.toState.particleSystemState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
+                        float newValue = Mathf.Lerp(fromValue, toValue, curveValue);
+                        //Debug.Log($"Setting startSpeed from {fromValue} to {newValue}");
+                        mainModule.startSpeed = newValue;
+                    }
+                    else if (item.parameterName == "Start Size")
+                    {
+                        float fromValue = transition.fromState.particleSystemState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
+                        float toValue = transition.toState.particleSystemState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
+                        float newValue = Mathf.Lerp(fromValue, toValue, curveValue);
+                        //Debug.Log($"Setting startSize from {fromValue} to {newValue}");
+                        mainModule.startSize = newValue;
+                    }
+                    else if (item.parameterName == "Gravity Modifier")
+                    {
+                        float fromValue = transition.fromState.particleSystemState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
+                        float toValue = transition.toState.particleSystemState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
+                        float newValue = Mathf.Lerp(fromValue, toValue, curveValue);
+                        //Debug.Log($"Setting gravityModifier from {fromValue} to {newValue}");
+                        mainModule.gravityModifier = newValue;
+                    }
+                    else if (item.parameterName == "Emission RateOverTime")
+                    {
+                        float fromValue = transition.fromState.particleSystemState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
+                        float toValue = transition.toState.particleSystemState.FloatSets.Find(p => p.para_name == item.parameterName).float_para;
+                        float newValue = Mathf.Lerp(fromValue, toValue, curveValue);
+                        //Debug.Log($"Setting emission rate over time from {fromValue} to {newValue}");
+                        emissionModule.rateOverTime = newValue;
+                    }
+                }
+                // Handle Color Parameters
+                else if (item.parameterType == ParameterType.Color)
+                {      
+                    //Debug.Log(item.parameterName);
+                    if (item.parameterName == "Start Color")
+                    {   
+                         
+                        Color fromValue = transition.fromState.particleSystemState.ColorSets.Find(p => p.para_name == item.parameterName).color_para;
+                        Color toValue = transition.toState.particleSystemState.ColorSets.Find(p => p.para_name == item.parameterName).color_para;
+                        Color newValue = Color.Lerp(fromValue, toValue, curveValue);
+                        //Debug.Log($"Setting startColor from {fromValue} to {newValue}");
+                        mainModule.startColor = newValue;
+                    }
+                }
+                // Handle Vector3 Parameters
+                else if (item.parameterType == ParameterType.Vector3)
+                {   
+                    Debug.Log(item.parameterName);
+                    if (item.parameterName == "Start Size3D")
+                    {   
+                         
+                        Vector3 fromValue = transition.fromState.particleSystemState.Vector3Sets.Find(p => p.para_name == item.parameterName).vector3_para;
+                        Vector3 toValue = transition.toState.particleSystemState.Vector3Sets.Find(p => p.para_name == item.parameterName).vector3_para;
+                        Vector3 newValue = Vector3.Lerp(fromValue, toValue, curveValue);
+                        //Debug.Log($"Setting startSize3D from {fromValue} to {newValue}");
+                        mainModule.startSizeXMultiplier = newValue.x;
+                        mainModule.startSizeYMultiplier = newValue.y;
+                        mainModule.startSizeZMultiplier = newValue.z;
+                    }
+                    else if (item.parameterName == "Start Rotation3D")
+                    {   
+                         Debug.Log(item.parameterName);
+                        Vector3 fromValue = transition.fromState.particleSystemState.Vector3Sets.Find(p => p.para_name == item.parameterName).vector3_para;
+                        Vector3 toValue = transition.toState.particleSystemState.Vector3Sets.Find(p => p.para_name == item.parameterName).vector3_para;
+                        Vector3 newValue = Vector3.Lerp(fromValue, toValue, curveValue);
+                        //Debug.Log($"Setting startRotation3D from {fromValue} to {newValue}");
+                        mainModule.startRotationXMultiplier = newValue.x;
+                        mainModule.startRotationYMultiplier = newValue.y;
+                        mainModule.startRotationZMultiplier = newValue.z;
+                    }
+                }
+                // Handle Bool Parameters
+                else if (item.parameterType == ParameterType.Bool)
+                {
+                     //Debug.Log(item.parameterName);
+                    if (item.parameterName == "Emission Enabled")
+                    {   
+                        
+                        bool fromValue = transition.fromState.particleSystemState.BoolSets.Find(p => p.para_name == item.parameterName).bool_para;
+                        bool toValue = transition.toState.particleSystemState.BoolSets.Find(p => p.para_name == item.parameterName).bool_para;
+                        bool newValue = curveValue > 0.5f ? toValue : fromValue;
+                        //Debug.Log($"Setting emission module enabled to {newValue}");
+                        emissionModule.enabled = newValue;
+                    }
+                }
+
+                yield return null; // Continue on the next frame
+            }
+
+            Debug.Log($"Finished processing on Particle System for parameter: {item.parameterName}");
+        }
+    }
+
 
 
 
@@ -373,6 +734,7 @@ public enum ParameterType
     Float,
     Color,
     Vector3,
+    Int,
     Bool
 }
 

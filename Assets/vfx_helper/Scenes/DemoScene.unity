@@ -1141,11 +1141,14 @@ MonoBehaviour:
     - targetRenderer: {fileID: 203480425}
       targetMaterials:
       - {fileID: 2100000, guid: 1f68b4ebc24b53542aafaf69df52b08a, type: 2}
-    targetTransforms: []
+    targetTransforms:
+    - {fileID: 203480427}
     targetLights:
     - {fileID: 538731249}
-    targetParticleSystems: []
-    targetVFXGraphs: []
+    targetParticleSystems:
+    - {fileID: 1347242618}
+    targetVFXGraphs:
+    - {fileID: 1959618939}
   transitions:
   - name: TurnOn
     processingStateAsset: {fileID: 11400000, guid: a717a607f1637544eb02890cf46e57bd,
@@ -6163,7 +6166,10 @@ VisualEffect:
     m_Vector3f:
       m_Array: []
     m_Vector4f:
-      m_Array: []
+      m_Array:
+      - m_Value: {x: 0, y: 0.5960782, z: 0.74509805, w: 0}
+        m_Name: use_color
+        m_Overridden: 1
     m_Uint:
       m_Array: []
     m_Int:
@@ -6177,7 +6183,10 @@ VisualEffect:
     m_NamedObject:
       m_Array: []
     m_Bool:
-      m_Array: []
+      m_Array:
+      - m_Value: 1
+        m_Name: enable
+        m_Overridden: 1
 --- !u!4 &1959618940
 Transform:
   m_ObjectHideFlags: 0
@@ -6187,7 +6196,7 @@ Transform:
   m_GameObject: {fileID: 1959618937}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -1.81, y: 1.56, z: -0.66}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

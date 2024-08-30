@@ -14,22 +14,42 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VFXStateAsset
   materialState:
     ColorSets:
-    - para_name: _myColor
-      color_para: {r: 0, g: 1.5850792, b: 2, a: 0}
+    - color_para: {r: 0, g: 1.5850792, b: 2, a: 0}
+      para_name: _myColor
     FloatSets:
     - para_name: _strength
       float_para: 0.5
     BoolSets: []
   vfxGraphState:
-    ColorSets: []
-    FloatSets: []
-    BoolSets: []
+    ColorSets:
+    - color_para: {r: 1, g: 0.982211, b: 0.06289297, a: 0}
+      para_name: use_color
+    FloatSets:
+    - para_name: spawn_rate
+      float_para: 20
+    IntSets:
+    - para_name: lifetime
+      int_para: 1
+    Vector3Sets:
+    - para_name: velocity
+      vector3_para: {x: -0.55, y: 5, z: -0.55}
+    BoolSets:
+    - para_name: enable
+      bool_para: 0
   particleSystemState:
-    FloatSets: []
+    ColorSets:
+    - color_para: {r: 0, g: 0.97982836, b: 1, a: 1}
+      para_name: Start Color
+    FloatSets:
+    - para_name: Start Size
+      float_para: 3
     BoolSets: []
-  transformState:
     Vector3Sets: []
-    BoolSets: []
+  transformState:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 2, y: 2, z: 2}
+    mode: 0
   lightState:
     color: {r: 1, g: 0.8906151, b: 0, a: 0}
     intensity: 5
