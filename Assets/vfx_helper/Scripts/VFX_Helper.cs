@@ -11,6 +11,192 @@ public class VFX_Helper : MonoBehaviour
     public List<VFXTransition> transitions;
     private bool isTransitioning = false; // Flag to track if a transition is in progress
 
+    // set state directly
+    public void SetState(string stateName, float waitSeconds = 0f)
+    {
+        // Find the VFX state by name
+        VFXTransition targetState = transitions.Find(t => t.name == stateName);
+
+        if (targetState == null)
+        {
+            Debug.LogWarning($"State '{stateName}' not found.");
+            return;
+        }
+
+        // If there's a wait time, start a coroutine to wait before applying the state
+        if (waitSeconds > 0f)
+        {
+            StartCoroutine(ApplyStateAfterDelay(targetState, waitSeconds));
+        }
+        else
+        {
+            // Apply the state immediately
+            ApplyState(targetState);
+        }
+    }
+
+    private IEnumerator ApplyStateAfterDelay(VFXTransition targetState, float waitSeconds)
+    {
+        yield return new WaitForSeconds(waitSeconds);
+        ApplyState(targetState);
+    }
+    // Apply the target state immediately
+    private void ApplyState(VFXTransition targetState)
+    {
+        // Traverse the target components
+        foreach (var target in targetComponents)
+        {
+            // Handle Renderer & Material Pairs
+            foreach (var rendererMaterialsPair in target.rendererMaterialsPairs)
+            {
+                Renderer renderer = rendererMaterialsPair.targetRenderer;
+                List<Material> materials = rendererMaterialsPair.targetMaterials;
+
+                foreach (var material in materials)
+                {
+                    // Apply float parameters
+                    foreach (var floatParam in targetState.toState.materialState.FloatSets)
+                    {
+                        material.SetFloat(floatParam.para_name, floatParam.float_para);
+                    }
+
+                    // Apply color parameters
+                    foreach (var colorParam in targetState.toState.materialState.ColorSets)
+                    {
+                        material.SetColor(colorParam.para_name, colorParam.color_para);
+                    }
+
+                    // Apply bool parameters
+                    foreach (var boolParam in targetState.toState.materialState.BoolSets)
+                    {
+                        material.SetFloat(boolParam.para_name, boolParam.bool_para ? 1f : 0f);
+                    }
+                }
+            }
+
+            // Handle Light Components
+            foreach (var light in target.targetLights)
+            {
+                light.color = targetState.toState.lightState.color;
+                light.intensity = targetState.toState.lightState.intensity;
+                light.range = targetState.toState.lightState.range;
+            }
+
+            // Handle Transform Components
+            foreach (var targetTransform in target.targetTransforms)
+            {
+                Vector3 targetPosition= targetState.toState.transformState.position;
+                Vector3 targetRotation= targetState.toState.transformState.rotation;
+                Vector3 targetScale= targetState.toState.transformState.scale;
+                if (targetState.toState.transformState.mode == CoordinateMode.Local)
+                {
+                    targetTransform.localPosition = targetPosition;
+                    targetTransform.localEulerAngles = targetRotation;
+                    targetTransform.localScale = targetScale;
+                }
+                else
+                {
+                    targetTransform.position =  targetPosition;
+                    targetTransform.rotation = Quaternion.Euler(targetRotation);
+                    targetTransform.localScale = targetScale;
+                }
+            }
+
+            // Handle VFX Graph Components
+            foreach (var vfxGraph in target.targetVFXGraphs)
+            {
+                foreach (var floatParam in targetState.toState.vfxGraphState.FloatSets)
+                {
+                    vfxGraph.SetFloat(floatParam.para_name, floatParam.float_para);
+                }
+
+                foreach (var colorParam in targetState.toState.vfxGraphState.ColorSets)
+                {
+                    vfxGraph.SetVector4(colorParam.para_name, colorParam.color_para);
+                }
+
+                foreach (var intParam in targetState.toState.vfxGraphState.IntSets)
+                {
+                    vfxGraph.SetInt(intParam.para_name, intParam.int_para);
+                }
+
+                foreach (var vector3Param in targetState.toState.vfxGraphState.Vector3Sets)
+                {
+                    vfxGraph.SetVector3(vector3Param.para_name, vector3Param.vector3_para);
+                }
+
+                foreach (var boolParam in targetState.toState.vfxGraphState.BoolSets)
+                {
+                    vfxGraph.SetBool(boolParam.para_name, boolParam.bool_para);
+                }
+            }
+
+            // Handle Particle System Components
+            foreach (var particleSystem in target.targetParticleSystems)
+            {
+                var mainModule = particleSystem.main;
+                var emissionModule = particleSystem.emission;
+
+                foreach (var floatParam in targetState.toState.particleSystemState.FloatSets)
+                {
+                    switch (floatParam.para_name)
+                    {
+                        case "startLifetime":
+                            mainModule.startLifetime = floatParam.float_para;
+                            break;
+                        case "startSpeed":
+                            mainModule.startSpeed = floatParam.float_para;
+                            break;
+                        case "startSize":
+                            mainModule.startSize = floatParam.float_para;
+                            break;
+                        case "gravityModifier":
+                            mainModule.gravityModifier = floatParam.float_para;
+                            break;
+                        case "emissionRateOverTime":
+                            emissionModule.rateOverTime = floatParam.float_para;
+                            break;
+                    }
+                }
+
+                foreach (var colorParam in targetState.toState.particleSystemState.ColorSets)
+                {
+                    if (colorParam.para_name == "startColor")
+                    {
+                        mainModule.startColor = colorParam.color_para;
+                    }
+                }
+
+                foreach (var vector3Param in targetState.toState.particleSystemState.Vector3Sets)
+                {
+                    switch (vector3Param.para_name)
+                    {
+                        case "startSize3D":
+                            mainModule.startSizeXMultiplier = vector3Param.vector3_para.x;
+                            mainModule.startSizeYMultiplier = vector3Param.vector3_para.y;
+                            mainModule.startSizeZMultiplier = vector3Param.vector3_para.z;
+                            break;
+                        case "startRotation3D":
+                            mainModule.startRotationXMultiplier = vector3Param.vector3_para.x;
+                            mainModule.startRotationYMultiplier = vector3Param.vector3_para.y;
+                            mainModule.startRotationZMultiplier = vector3Param.vector3_para.z;
+                            break;
+                    }
+                }
+
+                foreach (var boolParam in targetState.toState.particleSystemState.BoolSets)
+                {
+                    if (boolParam.para_name == "emissionEnabled")
+                    {
+                        emissionModule.enabled = boolParam.bool_para;
+                    }
+                }
+            }
+        }
+
+        Debug.Log($"State '{targetState.name}' applied immediately.");
+    }
+
     // Method to trigger a transition by name
     public void PlayTransition(string transitionName)
     {   
