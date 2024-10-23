@@ -213,17 +213,7 @@ public class VFXState
 
 
 
-[CreateAssetMenu(fileName = "NewVFXState", menuName = "VFXHelper/VFXStateAsset")]
-public class VFXStateAsset : ScriptableObject
-{   
-    public MaterialState materialState;
-    public VFXGraphState vfxGraphState;
-    public ParticleSystemState particleSystemState;
-    public TransformState transformState;
-    public LightState lightState;
-    
 
-}
 
 [System.Serializable]
 public class VFXProcessingState
@@ -239,21 +229,7 @@ public class VFXProcessingState
 }
 
 
-[CreateAssetMenu(fileName = "NewVFXProcessingState", menuName = "VFXHelper/VFXProcessingStateAsset")]
-public class VFXProcessingStateAsset : ScriptableObject
-{
-    public VFXProcessingState processingState;
 
-    // You can initialize the processing state in the constructor or through the Inspector
-    public VFXProcessingStateAsset()
-    {
-        // Default values for the processing state
-        processingState = new VFXProcessingState(
-            duration: 1.0f,
-            curve: AnimationCurve.Linear(0, 0, 1, 1)
-        );
-    }
-}
 
 
 [System.Serializable]
